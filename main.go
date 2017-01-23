@@ -19,8 +19,15 @@ type Conf struct {
 	AccessToken string `json:"access_token"`
 }
 
+// Version and BuildTime are filled in during build by the Makefile
+var (
+	Version   = "N/A"
+	BuildTime = "N/A"
+)
+
 var (
 	configFile = flag.String("config", "./manage-members-csv.json", "full path to the JSON config file")
+	csvFile    = flag.String("csv", "./forumusers.csv", "full path to the CSV file to process")
 	quiet      = flag.Bool("q", false, "if supplied, will silence prompts")
 )
 
@@ -53,6 +60,11 @@ func exit(exitCode int) {
 
 func main() {
 	flag.Parse()
+
+	fmt.Println("Manage Members CSV")
+	fmt.Printf("Version %s\n", Version)
+	fmt.Printf("Built %s\n", BuildTime)
+	fmt.Println()
 
 	// Load config file
 	if configFile == nil || strings.TrimSpace(*configFile) == "" {
@@ -92,19 +104,24 @@ func main() {
 		usage(1)
 	}
 
-	csvFile := flag.Arg(0)
-	if csvFile == "" {
-		action("The CSV file path must be the last argument")
+	// Optionally can be provided as the last arg
+	if flag.Arg(0) != "" {
+		t := flag.Arg(0)
+		csvFile = &t
+	}
+
+	if csvFile == nil || strings.TrimSpace(*csvFile) == "" {
+		action("The CSV file path must be provided")
 		usage(1)
 	}
 
-	fmt.Printf("Reading CSV file at %s\n", csvFile)
-	if _, err := os.Stat(csvFile); os.IsNotExist(err) {
+	fmt.Printf("Reading CSV file at %s\n", *csvFile)
+	if _, err := os.Stat(*csvFile); os.IsNotExist(err) {
 		action(err.Error())
 		usage(1)
 	}
 
-	b, err := ioutil.ReadFile(csvFile)
+	b, err := ioutil.ReadFile(*csvFile)
 	if err != nil {
 		action(err.Error())
 		exit(1)
