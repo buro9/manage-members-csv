@@ -1,4 +1,7 @@
 manage-members-csv
+manage-members-csv-linux
+manage-members-csv-osx
+manage-members-csv.exe
 
 # Compiled Object files, Static and Dynamic libs (Shared Objects)
 *.o
